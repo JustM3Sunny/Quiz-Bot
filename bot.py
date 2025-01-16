@@ -1,6 +1,7 @@
 import google.generativeai as genai
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext
+from telegram.ext import filters
 import random
 import time
 from collections import defaultdict
@@ -188,24 +189,25 @@ Welcome to Quiz Bot! Here are some commands you can use:
 # Main function to set up the Telegram bot
 def main():
     # Set up the Updater with your bot's token
-    updater = Updater("7579444917:AAEdnqC9yxAnY7aWrvZu_Cr8sK91vCT8hx0", use_context=True)
+    updater = Updater("YOUR_BOT_API_KEY", use_context=True)
+    dispatcher = updater.dispatcher
 
-    # Add handlers for the commands
-    updater.dispatcher.add_handler(CommandHandler("start", start))
-    updater.dispatcher.add_handler(CommandHandler("quiz", quiz))
-    updater.dispatcher.add_handler(CommandHandler("leaderboard", leaderboard))
-    updater.dispatcher.add_handler(CommandHandler("setprofile", set_profile))
-    updater.dispatcher.add_handler(CommandHandler("dailyspin", daily_spin))
-    updater.dispatcher.add_handler(CommandHandler("dailychallenge", daily_challenge))
-    updater.dispatcher.add_handler(CommandHandler("bonusquiz", bonus_quiz))
-    updater.dispatcher.add_handler(CommandHandler("help", help_command))
+    # Register handlers
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("quiz", quiz))
+    dispatcher.add_handler(CommandHandler("leaderboard", leaderboard))
+    dispatcher.add_handler(CommandHandler("help", help_command))
+    dispatcher.add_handler(CommandHandler("setprofile", set_profile))
+    dispatcher.add_handler(CommandHandler("dailyspin", daily_spin))
+    dispatcher.add_handler(CommandHandler("dailychallenge", daily_challenge))
+    dispatcher.add_handler(CommandHandler("bonusquiz", bonus_quiz))
 
-    # Handle user messages for answers
-    updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_answer))
+    # Register the handler for user answers
+    dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_answer))
 
-    # Start the bot to listen for incoming messages
+    # Start polling for updates
     updater.start_polling()
     updater.idle()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
