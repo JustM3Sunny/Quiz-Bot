@@ -8,7 +8,7 @@ from collections import defaultdict
 
 # Configure your API key for Gemini
 genai.configure(api_key="YOUR_API_KEY")
-model = genai.GenerativeModel("gemini-2.0-flash-exp")
+model = genai.GenerativeModel("gemini-1.5-flash-8b")
 
 # Sample quiz categories and difficulty levels
 categories = ["general knowledge", "sports", "history", "science", "movies"]
