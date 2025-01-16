@@ -188,7 +188,7 @@ Welcome to Quiz Bot! Here are some commands you can use:
 # Main function to set up the Telegram bot
 def main():
     # Set up the Updater with your bot's token
-  updater = Updater("7579444917:AAEdnqC9yxAnY7aWrvZu_Cr8sK91vCT8hx0", use_context=True)
+    updater = Updater("7579444917:AAEdnqC9yxAnY7aWrvZu_Cr8sK91vCT8hx0", use_context=True)
 
     # Add handlers for the commands
     updater.dispatcher.add_handler(CommandHandler("start", start))
