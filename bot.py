@@ -1,14 +1,14 @@
-import google.generativeai as genai
+import os
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext
 from telegram.ext import filters
 import random
 import time
 from collections import defaultdict
+from groq import Groq
 
-# Configure your API key for Gemini
-genai.configure(api_key="YOUR_API_KEY")
-model = genai.GenerativeModel("gemini-1.5-flash-8b")
+# Configure your API key for Groq
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 # Sample quiz categories and difficulty levels
 categories = ["general knowledge", "sports", "history", "science", "movies"]
@@ -17,11 +17,18 @@ difficulty_levels = ["easy", "medium", "hard"]
 # Dictionary to store user data
 user_data = defaultdict(dict)
 
-# Function to generate questions using Gemini
+# Function to generate questions using Groq
 def generate_question(category, difficulty):
     prompt = f"Generate a {difficulty} quiz question in the category of {category} with 4 options."
-    response = model.generate_content(prompt)
-    question_data = response.text.split("\n")  # Split response into different lines
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": "You are a helpful quiz assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        model="llama-3.3-70b-versatile"
+    )
+
+    question_data = chat_completion.choices[0].message.content.split("\n")  # Split response into different lines
     question = question_data[0]  # First line will be the question
     options = question_data[1:5]  # The next 4 lines will be the options
     correct_answer = "B"  # Assume option B is always the correct answer (you can adjust this if the model provides an answer)
@@ -46,7 +53,7 @@ def quiz(update: Update, context: CallbackContext):
 
     # Randomly select a category
     category = random.choice(categories)
-    # Generate a quiz question using Gemini
+    # Generate a quiz question using Groq
     question, options, correct_answer = generate_question(category, difficulty)
     
     # Store data in user_data
@@ -183,31 +190,36 @@ Welcome to Quiz Bot! Here are some commands you can use:
 4. /dailyspin - Spin the wheel for rewards 🎰
 5. /dailychallenge - Participate in the daily challenge 🎯
 6. /bonusquiz - Play a bonus quiz with extra rewards 🎁
-7. /help - See this message again 📚
 """)
+
+def unknown(update: Update, context: CallbackContext):
+    update.message.reply_text("❓ Sorry, I didn't understand that command. Type /help for a list of available commands.")
 
 # Main function to set up the Telegram bot
 def main():
-    # Set up the Updater with your bot's token
-    updater = Updater("YOUR_BOT_API_KEY", use_context=True)
+    # Set up the Updater and Dispatcher
+    updater = Updater(token=os.environ.get("TELEGRAM_API_KEY"), use_context=True)
     dispatcher = updater.dispatcher
 
-    # Register handlers
+    # Add handlers for commands and messages
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("quiz", quiz))
     dispatcher.add_handler(CommandHandler("leaderboard", leaderboard))
-    dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("setprofile", set_profile))
     dispatcher.add_handler(CommandHandler("dailyspin", daily_spin))
     dispatcher.add_handler(CommandHandler("dailychallenge", daily_challenge))
     dispatcher.add_handler(CommandHandler("bonusquiz", bonus_quiz))
-
-    # Register the handler for user answers
-    dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_answer))
-
-    # Start polling for updates
+    dispatcher.add_handler(CommandHandler("help", help_command))
+    
+    # Add handler for user answers
+    dispatcher.add_handler(MessageHandler(filters.Regex("^[A-Da-d]$"), handle_answer))
+    
+    # Handle unknown commands
+    dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, unknown))
+    
+    # Start the bot
     updater.start_polling()
     updater.idle()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
