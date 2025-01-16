@@ -8,7 +8,7 @@ from collections import defaultdict
 from groq import Groq
 
 # Configure your API key for Groq
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+client = Groq(api_key="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")
 
 # Sample quiz categories and difficulty levels
 categories = ["general knowledge", "sports", "history", "science", "movies"]
@@ -198,7 +198,7 @@ def unknown(update: Update, context: CallbackContext):
 # Main function to set up the Telegram bot
 def main():
     # Set up the Updater and Dispatcher
-    updater = Updater(token=os.environ.get("TELEGRAM_API_KEY"), use_context=True)
+    updater = Updater(token="7904988746:AAHxu2aE7dF7BUYSY8ovntOR-NNaxIrncCg", use_context=True)
     dispatcher = updater.dispatcher
 
     # Add handlers for commands and messages
